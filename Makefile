@@ -79,7 +79,7 @@ RUN apt-get update && apt-get install -y \
     libtool* && apt-get clean
 
 # Install rstan and other necessary R packages
-RUN R -e "install.packages(c('Rmisc','parallel','coda'), repos='https://cloud.r-project.org/')"
+RUN R -e "install.packages(c('Rmisc','parallel','coda','lubridate'), repos='https://cloud.r-project.org/')"
 RUN R -e "install.packages('rstan', repos='https://cloud.r-project.org/')"
 
 # Expose the port for RStudio Server
