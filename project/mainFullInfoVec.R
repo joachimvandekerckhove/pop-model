@@ -124,7 +124,7 @@ expmodel <- stan(stanFile,
                  control = list(adapt_delta   = 0.99,
                                 max_treedepth = 14),
                  chains  =    4 ,
-                 warmup  = 250 ,
-                 iter    = 500 )
+                 warmup  = 2500 ,
+                 iter    = 5000 )
 
 save.image(sprintf("./SS_%s.Rdata", Sys.Date()))
