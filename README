@@ -1,0 +1,3 @@
+Example code for partially observable predictor models.
+
+The Makefile sets up a container to run RStudio but is not necessary to read the R files in project/
