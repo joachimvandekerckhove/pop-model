@@ -76,15 +76,15 @@ parameters {
 	real<lower=0> sdS;
 
 	real       beta_0;
-  vector[nL] beta_covar;
+	vector[nL] beta_covar;
 	vector[4]  beta_lambda;
 }
 
 model {
 	// Likelihood
 	RT ~ normal(Lambda[personIndex, 1] +  
-			        Lambda[personIndex, 2] .* exp(-Lambda[personIndex, 3].*dayIndex), 
-			        Lambda[personIndex, 4] ./ sqrt(nrAssess));
+			Lambda[personIndex, 2] .* exp(-Lambda[personIndex, 3].*dayIndex), 
+			Lambda[personIndex, 4] ./ sqrt(nrAssess));
 
 	// Predicting MCI status
 	MCIStatus ~ bernoulli_logit(beta_0 + Lambda * beta_lambda + covar * beta_covar);
