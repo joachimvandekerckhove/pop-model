@@ -5,9 +5,9 @@ Williams, Mindy J. Katz, and Joachim Vandekerckhove.
 The data used in this project are not publicly available and are not included
 in this repository.  The code can be read but not run.
 
-To read the analysis code, access scripts/mainFullInfo.R.
+To read the analysis code, access [scripts/mainFullInfo.R](scripts/mainFullInfo.R).
 
-To read the results, access scripts/results.md.
+To read the results, access [scripts/README.md](scripts/README.md).
 
 To regenerate the results (with data), run `make collect-results` in the root directory.
 
