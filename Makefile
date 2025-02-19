@@ -107,12 +107,12 @@ $(TMP_DIR)/processed_results.rds: src/collectResults.R \
 collect-results: $(TMP_DIR)/processed_results.rds
 
 # Generate markdown output
-scripts/results.md: scripts/results.Rmd $(TMP_DIR)/processed_results.rds
+scripts/README.md: scripts/results.Rmd $(TMP_DIR)/processed_results.rds
 	mkdir -p scripts/results_files/figure-gfm
-	cd scripts && Rscript -e "rmarkdown::render('results.Rmd', output_format='github_document', output_file='results.md')"
+	cd scripts && Rscript -e "rmarkdown::render('results.Rmd', output_format='github_document', output_file='README.md')"
 
 # Generate report (markdown only)
-generate-report: scripts/results.md
+generate-report: scripts/README.md
 
 # Phony targets
 .PHONY: all all-cv all-fi manifest-cv descriptive-cv process-model-cv \
