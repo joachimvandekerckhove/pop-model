@@ -112,10 +112,10 @@ kable(cv_table,
 ```{r fi-results}
 for (model_type in names(results$fi_results)) { 
   if (!is.null(results$fi_results[[model_type]])) {
-    print(kable(results$fi_results[[model_type]],
-                caption = paste("Coefficient estimates for",
-                                results$model_labels[model_type]), 
-                digits = 3))
+    cat("\n\nTable: Coefficient estimates for", results$model_labels[model_type], "\n\n")
+    cat(kable(results$fi_results[[model_type]], 
+              format = "pipe",
+              digits = 3))
   }
 }
 ```
