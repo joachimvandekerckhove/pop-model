@@ -109,28 +109,28 @@ kable(cv_table,
 
 ### Full Information Results
 
+#### Coefficient estimates for Manifest only
 ```{r fi-manifest, results='asis'}
 if (!is.null(results$fi_results$manifest)) {
   kable(results$fi_results$manifest,
-        caption = "Coefficient estimates for Manifest only",
         format = "pipe",
         digits = 3)
 }
 ```
 
+#### Coefficient estimates for Manifest + latent descriptors
 ```{r fi-descriptive, results='asis'}
 if (!is.null(results$fi_results$descriptive)) {
   kable(results$fi_results$descriptive,
-        caption = "Coefficient estimates for Manifest + latent descriptors",
         format = "pipe",
         digits = 3)
 }
 ```
 
+#### Coefficient estimates for Manifest + latent process
 ```{r fi-process, results='asis'}
 if (!is.null(results$fi_results$process_model)) {
   kable(results$fi_results$process_model,
-        caption = "Coefficient estimates for Manifest + latent process",
         format = "pipe",
         digits = 3)
 }

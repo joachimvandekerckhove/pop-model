@@ -41,6 +41,8 @@ Cross-validation AUC results with 95% confidence intervals
 
 ### Full Information Results
 
+#### Coefficient estimates for Manifest only
+
 |              |   mean |    sd | q2.5.2.5% | q97.5.97.5% |
 |:-------------|-------:|------:|----------:|------------:|
 | coeff_age    |  0.279 | 0.123 |     0.039 |       0.518 |
@@ -49,7 +51,7 @@ Cross-validation AUC results with 95% confidence intervals
 | coeff_black  |  0.679 | 0.272 |     0.155 |       1.211 |
 | coeff_hisp   |  0.452 | 0.394 |    -0.323 |       1.229 |
 
-Coefficient estimates for Manifest only
+#### Coefficient estimates for Manifest + latent descriptors
 
 |              |   mean |    sd | q2.5.2.5% | q97.5.97.5% |
 |:-------------|-------:|------:|----------:|------------:|
@@ -61,7 +63,7 @@ Coefficient estimates for Manifest only
 | coeff_black  |  0.433 | 0.281 |    -0.117 |       0.991 |
 | coeff_hisp   |  0.269 | 0.403 |    -0.524 |       1.045 |
 
-Coefficient estimates for Manifest + latent descriptors
+#### Coefficient estimates for Manifest + latent process
 
 |                      |   mean |    sd | q2.5.2.5% | q97.5.97.5% |
 |:---------------------|-------:|------:|----------:|------------:|
@@ -74,5 +76,3 @@ Coefficient estimates for Manifest + latent descriptors
 | coeffMCIEduc         |  0.190 | 0.145 |    -0.092 |       0.475 |
 | coeffMCIEthnic_Black |  0.485 | 0.293 |    -0.088 |       1.065 |
 | coeffMCIEthnic_Hisp  |  0.292 | 0.416 |    -0.530 |       1.095 |
-
-Coefficient estimates for Manifest + latent process
