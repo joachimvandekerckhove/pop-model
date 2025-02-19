@@ -4,18 +4,16 @@ Partially observable predictor models for identifying cognitive markers
 
 - [Load processed results](#load-processed-results)
 - [Define colors for models](#define-colors-for-models)
-  - [Cross-Validation Results](#cross-validation-results)
-    - [ROC Curves](#roc-curves)
-    - [AUC Results](#auc-results)
-  - [Full Information Results](#full-information-results)
+- [Cross-Validation Results](#cross-validation-results)
+- [Full Information Results](#full-information-results)
 
-# Load processed results
+### Load processed results
 
 ``` r
 results <- readRDS(here::here("tmp/processed_results.rds"))
 ```
 
-# Define colors for models
+### Define colors for models
 
 ``` r
 model_colors <- c(
@@ -25,13 +23,13 @@ model_colors <- c(
 )
 ```
 
-## Cross-Validation Results
+### Cross-Validation Results
 
-### ROC Curves
+#### ROC Curves
 
 ![](results_files/figure-gfm/roc-plot-1.png)<!-- -->
 
-### AUC Results
+#### AUC Results
 
 |               | Model                         | AUC                    | Folds |
 |:--------------|:------------------------------|:-----------------------|------:|
@@ -41,7 +39,7 @@ model_colors <- c(
 
 Cross-validation AUC results with 95% confidence intervals
 
-## Full Information Results
+### Full Information Results
 
     ## 
     ## 

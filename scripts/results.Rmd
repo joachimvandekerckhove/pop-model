@@ -25,13 +25,13 @@ library(knitr)
 library(dplyr)
 ```
 
-# Load processed results
+### Load processed results
 
 ```{r echo=TRUE}
 results <- readRDS(here::here("tmp/processed_results.rds"))
 ```
 
-# Define colors for models
+### Define colors for models
 
 ```{r echo=TRUE}
 model_colors <- c(
@@ -41,9 +41,9 @@ model_colors <- c(
 )
 ```
 
-## Cross-Validation Results
+### Cross-Validation Results
 
-### ROC Curves
+#### ROC Curves
 
 ```{r roc-plot, fig.width=8, fig.height=8}
 ggplot() +
@@ -86,7 +86,7 @@ ggplot() +
   )
 ```
 
-### AUC Results
+#### AUC Results
 
 ```{r auc-table}
 cv_table <- do.call(rbind,
@@ -107,7 +107,7 @@ kable(cv_table,
       caption = "Cross-validation AUC results with 95% confidence intervals")
 ```
 
-## Full Information Results
+### Full Information Results
 
 ```{r fi-results}
 for (model_type in names(results$fi_results)) { 
