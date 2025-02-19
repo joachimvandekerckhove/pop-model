@@ -1,0 +1,121 @@
+---
+title: "Partially observable predictor models for identifying cognitive markers"
+date: "2025-02-19"
+output: 
+  pdf_document:
+    toc: true
+  github_document:
+    toc: true
+    html_preview: false
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE, 
+  warning = FALSE, 
+  message = FALSE,
+  fig.path = "results_files/figure-gfm/"
+)
+library(here)
+library(ggplot2)
+library(knitr)
+library(dplyr)
+```
+
+# Load processed results
+
+```{r}
+results <- readRDS(here::here("tmp/processed_results.rds"))
+```
+
+# Define colors for models
+
+```{r}
+model_colors <- c(
+  "Manifest only" = "#009E73",
+  "Manifest + latent descriptors" = "#E69F00",
+  "Manifest + latent process" = "#0072B2"
+)
+```
+
+## Cross-Validation Results
+
+### ROC Curves
+
+```{r roc-plot, fig.width=8, fig.height=8}
+ggplot() +
+  geom_ribbon(data = results$ci_data,  
+              aes(x = FPR, 
+                  ymin = lower, 
+                  ymax = upper,
+                  fill = Model,
+                  group = Model),
+              alpha = 0.2) +
+  geom_line(data = results$plot_data,
+            aes(x = FPR, 
+                y = TPR, 
+                color = Model, 
+                group = Model), 
+            size = 1) +
+  geom_abline(intercept = 0, 
+              slope = 1, 
+              linetype = "dashed", 
+              color = "gray50") +
+  scale_color_manual(values = model_colors) + 
+  scale_fill_manual(values = model_colors) + 
+  labs(x = "False positive rate", 
+       y = "True positive rate") + 
+  coord_equal() + 
+  theme_minimal() + 
+  theme(
+    text = element_text(family = "serif", color = "black"), 
+    axis.title = element_text(size = 26, color = "black"),
+    axis.text = element_text(size = 22, color = "black"),
+    legend.title = element_text(size = 22, color = "black"),
+    legend.text = element_text(size = 22, color = "black"),
+    legend.position = c(0.975, 0.05),
+    legend.justification = c(1, 0),
+    legend.direction = "vertical",
+    legend.box = "vertical",
+    legend.margin = margin(t = 5, r = 5, b = 5, l = 5),
+    legend.background = element_rect(fill = "white", color = NA),
+    legend.box.background = element_rect(fill = "white", color = NA)
+  )
+```
+
+### AUC Results
+
+```{r auc-table}
+cv_table <- do.call(rbind,
+                    lapply(results$cv_results, 
+                           function(res) {
+                             data.frame(
+                               Model = res$model,
+                               AUC = sprintf("%.3f [%.3f, %.3f]",
+                                             res$auc,
+                                             res$ci_lower,
+                                             res$ci_upper),
+                               Folds = res$n_folds
+                               )
+                             }
+                           )
+                    )
+kable(cv_table,
+      caption = "Cross-validation AUC results with 95% confidence intervals")
+```
+
+## Full Information Results
+
+```{r fi-results}
+for (model_type in names(results$fi_results)) { 
+  if (!is.null(results$fi_results[[model_type]])) {
+    print(kable(results$fi_results[[model_type]],
+                caption = paste("Coefficient estimates for",
+                                results$model_labels[model_type]), 
+                digits = 3))
+  }
+}
+```

@@ -1,281 +1,133 @@
-# Makefile for managing Docker-based RStudio setup
+# Makefile for POP models paper
 #
 # Targets:
-#   go:                      Alias for 'start' target.  Also the default target.
+#   manifest-cv:             Run the manifest model cross-validation.
+#   descriptive-cv:          Run the descriptive model cross-validation.
+#   process-model-cv:        Run the process model cross-validation.
+#   all-cv:                  Run all cross-validation models.
+#   manifest-fi:             Run the manifest model full information.
+#   descriptive-fi:          Run the descriptive model full information.
+#   process-model-fi:        Run the process model full information.
+#   all-fi:                  Run all full information models.
+#   all:                     Run all models.
+#   collect-results:         Collect the results for plotting and tables.
+#   generate-report:         Generate the markdown report.
+#   clone-repo:              Clone the repository.
+#   container-check:         Check if we are in the container.
 #   help:                    Display this help message.
-#   setup:                   Install docker infrastructure and ensure the system is up to date.
-#   generate-dockerfile:     Generate the Dockerfile if it doesn't already exist.
-#   generate-rprofile:       Generate the .Rprofile if it doesn't already exist.
-#   build:                   Build the Docker image.
-#   create:                  Create the Docker container.
-#   start:                   Start the Docker container. It builds the image if necessary, and restarts if stopped.
-#   stop:                    Stop the Docker container if it is running.
-#   clean-container:         Remove the Docker container.
-#   clean-image:             Remove the Docker image.
-#   clean-all:               Clean both the Docker container and image.
-#   status:                  Output whether the image is built, the container is created, and the container is running.
-#   check-setup:             Check if Docker infrastructure is installed.
-#   check-image-built:       Check if the Docker image is built.
-#   check-container-created: Check if the Docker container is created.
-#   check-container-running: Check if the Docker container is running.
 #
 # Example Usage:
-#   make
-#   make stop
-#   make status
-#   make clean-all
+#   make manifest-fi
+#   make process-model-cv
+#   make collect-results
+#   make generate-report
+#   make clone-repo
+#   make help
 
-# Variables:
-CONTAINER_NAME = rstudio-stan
-USERNAME = vagrant
-PASSWORD = vagrant
-HOST_PORT = 8789
+# Directory structure
+TMP_DIR = tmp
+CACHE_DIR = $(TMP_DIR)/cache
+CV_DIR = $(TMP_DIR)/cv
+FI_DIR = $(TMP_DIR)/fi
+FIG_DIR = figures
 
-# Define aliases
-.PHONY: go
-go: start
+# Number of folds for cross-validation
+NUM_FOLDS = 10
 
-# Get host information
-host = $(uname -a)
+# Job control - each model uses 4 cores, limit to 5 parallel jobs to stay under 20 cores
+JOBS := -j 5
+.NOTPARALLEL: generate-report collect-results
 
-# Define Dockerfile content
-define DOCKERFILE_CONTENT
+# Generate CV fold numbers
+FOLDS := $(shell seq 1 $(NUM_FOLDS))
 
-# Use the rocker/rstudio base image
-FROM rocker/rstudio:latest
+# Generate CV files for each model type
+MANIFEST_CV_FILES := $(foreach fold,$(FOLDS),$(CV_DIR)/ss_manifest_fold$(fold).Rdata)
+DESCRIPTIVE_CV_FILES := $(foreach fold,$(FOLDS),$(CV_DIR)/ss_descriptive_fold$(fold).Rdata)
+PROCESS_CV_FILES := $(foreach fold,$(FOLDS),$(CV_DIR)/ss_process_model_fold$(fold).Rdata)
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
+# Create required directories
+# Outputs: Creates directories if they don't exist
+$(TMP_DIR) $(CACHE_DIR) $(CV_DIR) $(FI_DIR) $(FIG_DIR):
+	mkdir -p $@
 
-# Install system dependencies for R and Stan
-RUN apt-get update && apt-get install -y \
-    sudo \
-    pandoc \
-    pandoc-citeproc \
-    libcurl4-gnutls-dev \
-    libcairo2-dev \
-    libxt-dev \
-    libssl-dev \
-    libxml2-dev \
-    libgit2-dev \
-    libglu1-mesa-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    libboost-all-dev \
-    cmake \
-    gfortran \
-    make \
-    build-essential \
-    g++ \
-    f2c \
-    libblas-dev \
-    liblapack-dev \
-    libpcre3-dev \
-    libreadline-dev \
-    libgsl-dev \
-    autoconf \
-    libtool* && apt-get clean
+# Rules for manifest model CV
+$(CV_DIR)/ss_manifest_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+	Rscript $< manifest $*
 
-# Install rstan and other necessary R packages
-RUN R -e "install.packages(c('Rmisc','parallel','coda','lubridate'), repos='https://cloud.r-project.org/')"
-RUN R -e "install.packages('rstan', repos='https://cloud.r-project.org/')"
+# Rules for descriptive model CV
+$(CV_DIR)/ss_descriptive_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+	Rscript $< descriptive $*
 
-# Expose the port for RStudio Server
-EXPOSE 8787
+# Rules for process model CV
+$(CV_DIR)/ss_process_model_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+	Rscript $< process_model $*
 
-# Add a user for RStudio
-ARG USERNAME
-ARG PASSWORD
-RUN useradd -m -d /home/$${USERNAME} -G sudo -s /bin/bash $${USERNAME} \
-    && echo "$${USERNAME}:$${PASSWORD}" | chpasswd
+# Model-specific CV targets with job control
+manifest-cv: $(MANIFEST_CV_FILES)
+.PHONY: manifest-cv
+.NOTPARALLEL: manifest-cv
 
-# Add the project directory
-RUN mkdir -p /home/$${USERNAME}/project
+descriptive-cv: $(DESCRIPTIVE_CV_FILES)
+.PHONY: descriptive-cv
+.NOTPARALLEL: descriptive-cv
 
-# Set permissions for /home/$${USERNAME}
-RUN chown -R $${USERNAME}:$${USERNAME} /home/$${USERNAME}
+process-model-cv: $(PROCESS_CV_FILES)
+.PHONY: process-model-cv
+.NOTPARALLEL: process-model-cv
 
-# Copy .Rprofile to root
-COPY .Rprofile /home/$${USERNAME}/.Rprofile
+# Run CV models sequentially but allow parallelism within each model type
+all-cv:
+	$(MAKE) $(JOBS) manifest-cv
+	$(MAKE) $(JOBS) descriptive-cv
+	$(MAKE) $(JOBS) process-model-cv
 
-# Set the default command to launch RStudio Server
-CMD ["/init"]
+# Full info model rules
+$(FI_DIR)/ss_%.Rdata: scripts/mainFullInfo.R | $(FI_DIR)
+	Rscript $< $*
 
-# Add the user to the sudoers file
-RUN echo '$${USERNAME} ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-endef
-export DOCKERFILE_CONTENT
+manifest-fi: $(FI_DIR)/ss_manifest.Rdata
+descriptive-fi: $(FI_DIR)/ss_descriptive.Rdata
+process-model-fi: $(FI_DIR)/ss_process_model.Rdata
 
-# Define .Rprofile content
-define RPROFILE_CONTENT
-setwd('/home/${USERNAME}/project/')
-cat(readLines('README.md'), sep = "\n")
-endef
-export RPROFILE_CONTENT
+# Run FI models sequentially
+all-fi:
+	$(MAKE) manifest-fi
+	$(MAKE) descriptive-fi
+	$(MAKE) process-model-fi
 
-# Help
-.PHONY: help
-help:
-	@head -n 32 Makefile
+all: all-cv all-fi
 
-# Generate Dockerfile
-.PHONY: generate-dockerfile
-generate-dockerfile:
-	@if [ -f Dockerfile ]; then \
-		echo "Dockerfile already exists."; \
+# Results processing
+$(TMP_DIR)/processed_results.rds: src/collectResults.R \
+    $(MANIFEST_CV_FILES) $(DESCRIPTIVE_CV_FILES) $(PROCESS_CV_FILES) \
+    $(FI_DIR)/ss_manifest.Rdata $(FI_DIR)/ss_descriptive.Rdata $(FI_DIR)/ss_process_model.Rdata | $(TMP_DIR)
+	Rscript $<
+
+collect-results: $(TMP_DIR)/processed_results.rds
+
+# Generate markdown output
+scripts/results.md: scripts/results.Rmd $(TMP_DIR)/processed_results.rds
+	mkdir -p scripts/results_files/figure-gfm
+	cd scripts && Rscript -e "rmarkdown::render('results.Rmd', output_format='github_document', output_file='results.md')"
+
+# Generate report (markdown only)
+generate-report: scripts/results.md
+
+# Phony targets
+.PHONY: all all-cv all-fi manifest-cv descriptive-cv process-model-cv \
+        manifest-fi descriptive-fi process-model-fi generate-report collect-results \
+        container-check clone-repo
+
+# Check if we are in the container
+container-check:
+	if [ -f /.dockerenv ]; then \
+		echo "Running in container"; \
 	else \
-		echo "$$DOCKERFILE_CONTENT" > Dockerfile; \
-		echo "Dockerfile generated."; \
+		echo "Not running in container"; \
+		exit 1; \
 	fi
 
-# Generate .Rprofile
-.PHONY: generate-rprofile
-generate-rprofile:
-	@if [ -f .Rprofile ]; then \
-		echo ".Rprofile already exists."; \
-	else \
-		echo "$$RPROFILE_CONTENT" > .Rprofile; \
-		echo ".Rprofile generated."; \
-	fi
-
-# Install docker infrastructure
-.PHONY: setup
-setup:
-	@if command -v docker > /dev/null 2>&1; then \
-		echo "Docker infrastructure is already installed."; \
-	else \
-		echo -n "First we need to make sure your system is up to date." && \
-			sleep 1 && echo -n "." && sleep 1 && echo "." && sleep 1; \
-		sudo apt -y update; \
-		sudo apt -y upgrade; \
-		echo -n "Now we install Docker." && \
-			sleep 1 && echo -n "." && sleep 1 && echo "." && sleep 1; \
-		sudo apt -y install docker-buildx && \
-			echo "Done with setup."; \
-	fi
-
-# Build docker image
-.PHONY: build
-build: setup generate-dockerfile generate-rprofile
-	@if sudo docker image inspect $(CONTAINER_NAME) > /dev/null 2>&1; then \
-		echo "Docker image $(CONTAINER_NAME) already built."; \
-	else \
-		echo -n "Building the Docker image. This will take a while."; \
-			sleep 1 && echo -n "." && sleep 1 && echo "." && sleep 1; \
-		sudo docker build --build-arg USERNAME=$(USERNAME) \
-				  --build-arg PASSWORD=$(PASSWORD) \
-				  -t $(CONTAINER_NAME) -f ./Dockerfile . && \
-		echo "Docker image built."; \
-	fi
-
-# Create the docker container
-.PHONY: create
-create:
-	@if sudo docker ps -aq -f name=$(CONTAINER_NAME) | grep -q .; then \
-		echo "Docker container $(CONTAINER_NAME) already created."; \
-	else \
-		echo "Creating Docker container $(CONTAINER_NAME)..."; \
-		sudo docker run -d \
-			-p $(HOST_PORT):8787 \
-			-v $(shell pwd)/project/:/home/$(USERNAME)/project \
-			--name $(CONTAINER_NAME) $(CONTAINER_NAME) && \
-		echo "Docker container created." && \
-		echo "Access RStudio by navigating to http://host:$(HOST_PORT)/ in your web browser." && \
-		echo "The username:password is $(USERNAME):$(PASSWORD)"; \
-	fi
-
-# Create the docker container
-.PHONY: start
-start: setup build create
-	@if sudo docker ps -q -f name=$(CONTAINER_NAME) | grep -q .; then \
-		echo "Docker container $(CONTAINER_NAME) already running on port $(HOST_PORT)."; \
-	else \
-		sudo docker start $(CONTAINER_NAME) > /dev/null 2>&1 && \
-			echo "Docker container $(CONTAINER_NAME) started."; \
-	fi
-	@echo "Access RStudio by navigating to http://host:$(HOST_PORT)/ in your web browser."
-	@echo "The username:password is $(USERNAME):$(PASSWORD)"
-
-# Halt the docker container
-.PHONY: stop
-stop:
-	@if sudo docker ps -q -f name=$(CONTAINER_NAME) | grep -q .; then \
-		echo "Stopping Docker container $(CONTAINER_NAME)..." && \
-		sudo docker stop $(CONTAINER_NAME) > /dev/null 2>&1 && \
-		echo "Docker container $(CONTAINER_NAME) stopped."; \
-	else \
-		echo "Docker container $(CONTAINER_NAME) not running."; \
-	fi
-
-
-# Cleanup Dockerfile
-.PHONY: clean-Dockerfile
-clean-Dockerfile:
-	@rm Dockerfile && \
-		echo "Dockerfile removed."
-
-# Cleanup .Rprofile
-.PHONY: clean-Rprofile
-clean-Rprofile:
-	@rm .Rprofile && \
-		echo ".Rprofile removed."
-
-# Cleanup docker container
-.PHONY: clean-container
-clean-container:
-	@sudo docker rm -f $(CONTAINER_NAME) && \
-		echo "Docker container removed."
-
-# Cleanup docker image
-.PHONY: clean-image
-clean-image:
-	@sudo docker rmi -f $(CONTAINER_NAME) && \
-		echo "Docker image removed."
-
-# Cleanup both docker container and image
-.PHONY: clean-all
-clean-all: clean-container clean-image clean-Rprofile clean-Dockerfile
-
-
-# Status of Docker environment
-.PHONY: status
-status: check-setup check-image-built check-container-created check-container-running
-
-# Check if the Docker infrastructure is installed
-.PHONY: check-setup
-check-setup:
-	@if command -v docker > /dev/null 2>&1; then \
-		echo "Docker infrastructure is installed."; \
-	else \
-		echo "Docker infrastructure is not installed. Please install docker-buildx."; \
-	fi
-
-# Check if the Docker image is built
-.PHONY: check-image-built
-check-image-built:
-	@if sudo docker image inspect $(CONTAINER_NAME) > /dev/null 2>&1; then \
-		echo "Docker image $(CONTAINER_NAME) is built."; \
-	else \
-		echo "Docker image $(CONTAINER_NAME) is not built."; \
-	fi
-
-# Check if the Docker container is created
-.PHONY: check-container-created
-check-container-created:
-	@if sudo docker ps -aq -f name=$(CONTAINER_NAME) | grep -q .; then \
-		echo "Docker container $(CONTAINER_NAME) is created."; \
-	else \
-		echo "Docker container $(CONTAINER_NAME) is not created."; \
-	fi
-
-# Check if the Docker container is running
-.PHONY: check-container-running
-check-container-running:
-	@if sudo docker ps -q -f name=$(CONTAINER_NAME) | grep -q .; then \
-		echo "Docker container $(CONTAINER_NAME) is running on port $(HOST_PORT)."; \
-	else \
-		echo "Docker container $(CONTAINER_NAME) is not running."; \
-	fi
-
+# Clone the repository
+clone-repo: container-check
+	git clone https://github.com/joachimvandekerckhove/pop-models.git
