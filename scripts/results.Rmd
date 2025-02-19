@@ -27,13 +27,13 @@ library(dplyr)
 
 # Load processed results
 
-```{r}
+```{r echo=TRUE}
 results <- readRDS(here::here("tmp/processed_results.rds"))
 ```
 
 # Define colors for models
 
-```{r}
+```{r echo=TRUE}
 model_colors <- c(
   "Manifest only" = "#009E73",
   "Manifest + latent descriptors" = "#E69F00",

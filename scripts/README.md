@@ -11,7 +11,19 @@ Partially observable predictor models for identifying cognitive markers
 
 # Load processed results
 
+``` r
+results <- readRDS(here::here("tmp/processed_results.rds"))
+```
+
 # Define colors for models
+
+``` r
+model_colors <- c(
+  "Manifest only" = "#009E73",
+  "Manifest + latent descriptors" = "#E69F00",
+  "Manifest + latent process" = "#0072B2"
+)
+```
 
 ## Cross-Validation Results
 
