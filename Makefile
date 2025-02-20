@@ -52,15 +52,15 @@ $(TMP_DIR) $(CACHE_DIR) $(CV_DIR) $(FI_DIR) $(FIG_DIR):
 	mkdir -p $@
 
 # Rules for manifest model CV
-$(CV_DIR)/ss_manifest_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+$(CV_DIR)/ss_manifest_fold%.Rdata: scripts/mainCrossVal.R src/stan/manifest.stan | $(CV_DIR)
 	Rscript $< manifest $*
 
 # Rules for descriptive model CV
-$(CV_DIR)/ss_descriptive_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+$(CV_DIR)/ss_descriptive_fold%.Rdata: scripts/mainCrossVal.R src/stan/descriptive.stan | $(CV_DIR)
 	Rscript $< descriptive $*
 
 # Rules for process model CV
-$(CV_DIR)/ss_process_model_fold%.Rdata: scripts/mainCrossVal.R | $(CV_DIR)
+$(CV_DIR)/ss_process_model_fold%.Rdata: scripts/mainCrossVal.R src/stan/process_model.stan | $(CV_DIR)
 	Rscript $< process_model $*
 
 # Model-specific CV targets with job control
@@ -83,7 +83,7 @@ all-cv:
 	$(MAKE) $(JOBS) process-model-cv
 
 # Full info model rules
-$(FI_DIR)/ss_%.Rdata: scripts/mainFullInfo.R | $(FI_DIR)
+$(FI_DIR)/ss_%.Rdata: scripts/mainFullInfo.R src/stan/%.stan | $(FI_DIR)
 	Rscript $< $*
 
 manifest-fi: $(FI_DIR)/ss_manifest.Rdata
