@@ -7,6 +7,13 @@ Partially observable predictor models for identifying cognitive markers
 - [Cross-Validation Results](#cross-validation-results)
 - [Full Information Results](#full-information-results)
 
+These results belong to “Partially observable predictor models for
+identifying cognitive markers” by Zita Oravecz, Martin Sliwinski, Sharon
+H. Kim, Lindy Williams, Mindy J. Katz, and Joachim Vandekerckhove.
+
+Note that due to randomness in the MCMC procedure, these results may not
+exactly match the results in the paper.
+
 ### Load processed results
 
 ``` r
@@ -31,11 +38,11 @@ model_colors <- c(
 
 #### AUC Results
 
-|               | Model                         | AUC                    | Folds |
-|:--------------|:------------------------------|:-----------------------|------:|
-| manifest      | Manifest only                 | 0.565 \[0.495, 0.635\] |    10 |
-| descriptive   | Manifest + latent descriptors | 0.738 \[0.673, 0.803\] |    10 |
-| process_model | Manifest + latent process     | 0.730 \[0.664, 0.797\] |    10 |
+|               | Model                         | AUC                       | Folds |
+|:--------------|:------------------------------|:--------------------------|------:|
+| manifest      | Manifest only                 | 0.5640 \[0.4938, 0.6342\] |    10 |
+| descriptive   | Manifest + latent descriptors | 0.7371 \[0.6717, 0.8026\] |    10 |
+| process_model | Manifest + latent process     | 0.7346 \[0.6680, 0.8013\] |    10 |
 
 Cross-validation AUC results with 95% confidence intervals
 
@@ -43,36 +50,15 @@ Cross-validation AUC results with 95% confidence intervals
 
 #### Coefficient estimates for Manifest only
 
-|              |   mean |    sd |   2.5% | 97.5% |
-|:-------------|-------:|------:|-------:|------:|
-| coeff_age    |  0.279 | 0.123 |  0.039 | 0.518 |
-| coeff_gender | -0.235 | 0.262 | -0.747 | 0.278 |
-| coeff_educ   |  0.072 | 0.135 | -0.194 | 0.339 |
-| coeff_black  |  0.679 | 0.272 |  0.155 | 1.211 |
-| coeff_hisp   |  0.452 | 0.394 | -0.323 | 1.229 |
+|                  |    mean |     sd |    2.5% |   97.5% |
+|:-----------------|--------:|-------:|--------:|--------:|
+| intercept_latent | -1.1898 | 0.2562 | -1.7038 | -0.7059 |
+| coeff_age        |  0.2921 | 0.1265 |  0.0426 |  0.5394 |
+| coeff_gender     | -0.2303 | 0.2808 | -0.7640 |  0.3287 |
+| coeff_educ       |  0.0972 | 0.1383 | -0.1695 |  0.3744 |
+| coeff_black      |  0.7985 | 0.2968 |  0.2196 |  1.3916 |
+| coeff_hisp       |  0.6117 | 0.4340 | -0.2352 |  1.4633 |
 
 #### Coefficient estimates for Manifest + latent descriptors
 
-|              |   mean |    sd |   2.5% | 97.5% |
-|:-------------|-------:|------:|-------:|------:|
-| coeff_ssa    |  0.705 | 0.172 |  0.378 | 1.050 |
-| coeff_sss    |  0.515 | 0.649 | -0.759 | 1.801 |
-| coeff_age    |  0.183 | 0.129 | -0.070 | 0.436 |
-| coeff_gender | -0.244 | 0.272 | -0.776 | 0.298 |
-| coeff_educ   |  0.160 | 0.138 | -0.112 | 0.434 |
-| coeff_black  |  0.433 | 0.281 | -0.117 | 0.991 |
-| coeff_hisp   |  0.269 | 0.403 | -0.524 | 1.045 |
-
 #### Coefficient estimates for Manifest + latent process
-
-|                      |   mean |    sd |   2.5% |  97.5% |
-|:---------------------|-------:|------:|-------:|-------:|
-| coeffMCIAsymptote    |  0.643 | 0.230 |  0.195 |  1.100 |
-| coeffMCIIIV          |  0.838 | 0.573 | -0.270 |  1.993 |
-| coeffMCIGain         | -0.033 | 0.163 | -0.359 |  0.283 |
-| coeffMCILearning     | -1.405 | 0.610 | -2.616 | -0.229 |
-| coeffMCIAge          |  0.192 | 0.137 | -0.077 |  0.460 |
-| coeffMCIGender       | -0.194 | 0.284 | -0.748 |  0.372 |
-| coeffMCIEduc         |  0.190 | 0.145 | -0.092 |  0.475 |
-| coeffMCIEthnic_Black |  0.485 | 0.293 | -0.088 |  1.065 |
-| coeffMCIEthnic_Hisp  |  0.292 | 0.416 | -0.530 |  1.095 |
