@@ -1,103 +1,108 @@
 data {
 	int<lower=1> N;      // total number of datapoints
-	int<lower=1> nX;     // total number of person-predictors
-	int<lower=1> nL;     // total number of covariates for logistic
 	int<lower=1> P;      // total number of persons
 	int<lower=1> K;      // total number of persons in training set
+	int<lower=1> nL;     // total number of covariates for logistic
+	matrix[P, nL] L;     // logistic covariate matrix 
 	vector[N] RT;        // all RT data
 	vector[N] dayIndex;  // all assessments nested in persons
 	int nrAssess[N];     // how many assessments that day
 	int personIndex[N];  // which person?
-	matrix[P, nL] L;     // logistic covariate matrix 
-	int<lower=0,upper=1> MCIStatus[P]; // MCI status
-	int<lower=0,upper=1> train[P];  // Train or test?
+	int<lower=0,upper=1> MCIStatus[P];  // MCI status
+	int<lower=0,upper=1> train[P];      // Train or test?
 }
 
 parameters {
-	// person-specific double negative exponential parameters
-	vector<lower=0>[P] rC;    // continuous rate or learning
-	vector<lower=0>[P] gC;    // gain between no practice and asymptote
-	vector<lower=0>[P] a;     // asymptotic response time
-	vector<lower=0>[P] sdE;   // IIV
+	// Asymptote	
+	real mu_asymptote;
+	real<lower=0> sd_asymptote;
+	vector<lower=0>[P] asymptote;
 
-	real muA;     // population mean asymptote
-	real muSdE;   // population mean error standard deviation
-	real mugC;    // population mean gain
-	real murC;    // population mean learning
+	// IIV
+	real mu_iiv;
+	real<lower=0> sd_iiv;
+	vector<lower=0>[P] iiv;
 
-	real<lower=0> aSd;
-	real<lower=0> sdESd;
-	real<lower=0> gCSd;
-	real<lower=0> rCSd;
+	// Gain
+	real mu_gain;
+	real<lower=0> sd_gain;
+	vector<lower=0>[P] gain;
+	
+	// Learning
+	real mu_learning;
+	real<lower=0> sd_learning;
+	vector<lower=0>[P] learning;
 
-	real MCIIntercept;
-	real coeffMCIAsymptote;
-	real coeffMCIGain;
-	real coeffMCILearning;
-	real coeffMCIIIV;
-	real coeffMCIAge;
-	real coeffMCIGender;
-	real coeffMCIEduc;
-	real coeffMCIEthnic_Black;
-	real coeffMCIEthnic_Hisp;
+	// Regression coefficients
+	real intercept_latent;
+	real coeff_asymptote;
+	real coeff_gain;
+	real coeff_learning;
+	real coeff_iiv;
+	real coeff_age;
+	real coeff_gender;
+	real coeff_educ;
+	real coeff_black;
+	real coeff_hisp;
 }
 
 transformed parameters {
     vector[P] pi;
 
     for (p in 1:P) {
-        pi[p] = MCIIntercept + 
-                    coeffMCIAsymptote    * a  [p] +
-                		coeffMCIGain         * gC [p] + 
-                		coeffMCILearning     * rC [p] +
-                		coeffMCIIIV          * sdE[p] +
-                		coeffMCIAge          * L[p,1] +
-                		coeffMCIGender       * L[p,2] +
-                		coeffMCIEduc         * L[p,3] +
-                		coeffMCIEthnic_Black * L[p,4] +
-                		coeffMCIEthnic_Hisp  * L[p,5];
+        pi[p] = intercept_latent + 
+                    coeff_asymptote * asymptote[p] +
+                	coeff_gain      * gain[p] + 
+                	coeff_learning  * learning[p] +
+                	coeff_iiv       * iiv[p] +
+                	coeff_age       * L[p,1] +
+                	coeff_gender    * L[p,2] +
+                	coeff_educ      * L[p,3] +
+                	coeff_black     * L[p,4] +
+                	coeff_hisp      * L[p,5];
     }
 }
 
 model {
-	// Likelihood
+	// Projection to RT data
 	for (n in 1:N) {
-		RT[n] ~ normal(a[personIndex[n]] +  
-			       gC[personIndex[n]]*exp(-rC[personIndex[n]]*dayIndex[n]), 
-			       sdE[personIndex[n]]/sqrt(nrAssess[n]));
+		RT[n] ~ normal(asymptote[personIndex[n]] +  
+			       gain[personIndex[n]]*exp(-learning[personIndex[n]]*dayIndex[n]), 
+			       iiv[personIndex[n]]/sqrt(nrAssess[n]));
 	}
 
-	// Predicting MCI status
+	// Projection to MCI status data
 	for (p in 1:P) {
-            if (train[p]) {
-		MCIStatus[p] ~ bernoulli_logit(pi[p]);
+        if (train[p]) {
+		    MCIStatus[p] ~ bernoulli_logit(pi[p]);
 	    }
 	}
 
+	// Hierarchical level
+	learning  ~ normal(mu_learning, sd_learning);
+	gain      ~ normal(mu_gain, sd_gain);
+	asymptote ~ normal(mu_asymptote, sd_asymptote);
+	iiv       ~ normal(mu_iiv, sd_iiv);
+
 	// Priors
-	MCIIntercept         ~ normal(0,1);
-	coeffMCIAsymptote    ~ normal(0,1);
-	coeffMCIGain         ~ normal(0,1);
-	coeffMCILearning     ~ normal(0,1);
-	coeffMCIIIV          ~ normal(0,1);
-	coeffMCIAge          ~ normal(0,1);
-	coeffMCIGender       ~ normal(0,1);
-	coeffMCIEduc         ~ normal(0,1);
-	coeffMCIEthnic_Black ~ normal(0,1);
-	coeffMCIEthnic_Hisp  ~ normal(0,1);
+	intercept_latent ~ normal(0,10);
+	coeff_asymptote  ~ normal(0,10);
+	coeff_gain       ~ normal(0,10);
+	coeff_learning   ~ normal(0,10);
+	coeff_iiv        ~ normal(0,10);
+	coeff_age        ~ normal(0,10);
+	coeff_gender     ~ normal(0,10);
+	coeff_educ       ~ normal(0,10);
+	coeff_black      ~ normal(0,10);
+	coeff_hisp       ~ normal(0,10);
 
-	rC  ~ normal(murC , rCSd );
-	gC  ~ normal(mugC , gCSd );
-	a   ~ normal(muA  , aSd  );
-	sdE ~ normal(muSdE, sdESd);
+	mu_learning  ~ normal(0,10);
+	mu_asymptote ~ normal(0,10);
+	mu_gain      ~ normal(0,10);
+	mu_iiv       ~ normal(0,10);
 
-	murC  ~ normal(0,10);
-	mugC  ~ normal(0,10);
-	muA   ~ normal(0,10);
-	muSdE ~ normal(0, 1);
-
-	rCSd  ~ normal(0,10);
-	gCSd  ~ normal(0,10);
-	aSd   ~ normal(0,10);
-	sdESd ~ normal(0, 1);
+	sd_learning  ~ normal(0,10);
+	sd_asymptote ~ normal(0,10);
+	sd_gain      ~ normal(0,10);
+	sd_iiv       ~ normal(0,10);
 } 

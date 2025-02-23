@@ -33,20 +33,27 @@ model_type <- args[1]
 switch(model_type,
        "process_model" = {
            model <- "pop.process_model"
-           parameters <- c("a", "sdE", "gC", "rC", "muA", "muSdE", "mugC", "murC", "aSd", "sdESd", "gCSd", "rCSd", "coeffMCIAsymptote", "coeffMCIIIV", "coeffMCIGain", "coeffMCILearning", "coeffMCIAge", "coeffMCIGender", "coeffMCIEduc", "coeffMCIEthnic_Black", "MCIIntercept", "coeffMCIEthnic_Hisp", "pi")
+           parameters <- c("intercept_latent",
+                           "mu_asymptote", "mu_iiv", "mu_gain", "mu_learning",
+                           "sd_asymptote", "sd_iiv", "sd_gain", "sd_learning",
+                           "coeff_asymptote", "coeff_iiv", "coeff_gain", "coeff_learning",
+                           "coeff_age", "coeff_gender", "coeff_educ", "coeff_black",
+                           "coeff_hisp", "pi")
        },
        "descriptive" = {
            model <- "pop.descriptive"
            parameters <- c("intercept_latent",
-                          "coeff_ssa", "coeff_sss",
-                          "coeff_age", "coeff_gender", "coeff_educ", "coeff_black",
-                          "coeff_hisp", "pi")
+                           "mu_mrt", "mu_srt",
+                           "sd_mrt", "sd_srt",
+                           "coeff_mrt", "coeff_srt",
+                           "coeff_age", "coeff_gender", "coeff_educ", "coeff_black",
+                           "coeff_hisp", "pi")
        },
        "manifest" = {
            model <- "pop.manifest"
            parameters <- c("intercept_latent",
-                          "coeff_age", "coeff_gender", "coeff_educ", "coeff_black",
-                          "coeff_hisp", "pi")
+                           "coeff_age", "coeff_gender", "coeff_educ", "coeff_black",
+                           "coeff_hisp", "pi")
        },
        stop(sprintf("Invalid model_type '%s'. Must be one of: process_model, descriptive, manifest", 
                    model_type)))

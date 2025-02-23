@@ -31,18 +31,17 @@ fold <- as.numeric(args[2])
 switch(model_type,
        "process_model" = {
            model <- "pop.process_model"
-           parameters <- c("pi")
        },
        "descriptive" = {
            model <- "pop.descriptive"
-           parameters <- c("pi")
        },
        "manifest" = {
            model <- "pop.manifest"
-           parameters <- c("pi")
        },
        stop(sprintf("Invalid model_type '%s'. Must be one of: process_model, descriptive, manifest", 
                    model_type)))
+
+parameters <- c("pi")
 
 # Use external Stan model file
 stanFile = here::here("src/stan", paste0(model, ".stan"))
@@ -67,8 +66,8 @@ expmodel <- stan(stanFile,
                 control = list(adapt_delta   = 0.99,
                                max_treedepth = 14),
                 chains  =    4 ,
-                warmup  = 2000 ,
-                iter    = 2500 )
+                warmup  = 2500 ,
+                iter    = 5000 )
 
 savefile <- here::here(sprintf("tmp/cv/ss_%s_fold%i.Rdata", model_type, fold))
 

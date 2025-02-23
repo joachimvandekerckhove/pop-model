@@ -5,10 +5,11 @@ data {
     matrix[P, nL] L;     // logistic covariate matrix
 
     int<lower=0,upper=1> MCIStatus[P];  // MCI status
-    int<lower=0,upper=1> train[P];  // Train or test?
+    int<lower=0,upper=1> train[P];      // Train or test?
 }
 
 parameters {
+	// Regression coefficients
     real intercept_latent;
     real coeff_age;
     real coeff_gender;
@@ -21,18 +22,17 @@ transformed parameters {
     vector[P] pi;
 
     for (p in 1:P) {
-        pi[p] = 0
-                + intercept_latent
+        pi[p] = intercept_latent
                 + coeff_age    * L[p,1]
                 + coeff_gender * L[p,2]
                 + coeff_educ   * L[p,3]
                 + coeff_black  * L[p,4]
-                + coeff_hisp   * L[p,5]
-                ;
+                + coeff_hisp   * L[p,5];
     }
 }
 
 model {
+	// Projection to MCI status data
     for (p in 1:P) {
         if (train[p]) {
             MCIStatus[p] ~ bernoulli_logit(pi[p]);
@@ -40,11 +40,10 @@ model {
     }
 
     // Priors
-    intercept_latent   ~ normal(0,1);
-
-    coeff_age    ~ normal(0,1);
-    coeff_gender ~ normal(0,1);
-    coeff_educ   ~ normal(0,1);
-    coeff_black  ~ normal(0,1);
-    coeff_hisp   ~ normal(0,1);
+    intercept_latent ~ normal(0,10);
+    coeff_age        ~ normal(0,10);
+    coeff_gender     ~ normal(0,10);
+    coeff_educ       ~ normal(0,10);
+    coeff_black      ~ normal(0,10);
+    coeff_hisp       ~ normal(0,10);
 }
