@@ -40,10 +40,10 @@ model {
     }
 
     // Priors
-    intercept_latent ~ normal(0,10);
-    coeff_age        ~ normal(0,10);
-    coeff_gender     ~ normal(0,10);
-    coeff_educ       ~ normal(0,10);
-    coeff_black      ~ normal(0,10);
-    coeff_hisp       ~ normal(0,10);
+    intercept_latent ~ normal(0,1);
+    coeff_age        ~ normal(0,1);
+    coeff_gender     ~ normal(0,1);
+    coeff_educ       ~ normal(0,1);
+    coeff_black      ~ normal(0,1);
+    coeff_hisp       ~ normal(0,1);
 }

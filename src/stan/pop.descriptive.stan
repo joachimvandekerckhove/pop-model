@@ -68,14 +68,14 @@ model {
     srt ~ normal(mu_srt, sd_srt);
 
     // Priors
-    intercept_latent ~ normal(0,10);
-    coeff_mrt        ~ normal(0,10);
-    coeff_srt        ~ normal(0,10);
-    coeff_age        ~ normal(0,10);
-    coeff_gender     ~ normal(0,10);
-    coeff_educ       ~ normal(0,10);
-    coeff_black      ~ normal(0,10);
-    coeff_hisp       ~ normal(0,10);
+    intercept_latent ~ normal(0,1);
+    coeff_mrt        ~ normal(0,1);
+    coeff_srt        ~ normal(0,1);
+    coeff_age        ~ normal(0,1);
+    coeff_gender     ~ normal(0,1);
+    coeff_educ       ~ normal(0,1);
+    coeff_black      ~ normal(0,1);
+    coeff_hisp       ~ normal(0,1);
 
     mu_mrt ~ normal(0,10);
     mu_srt ~ normal(0,10);

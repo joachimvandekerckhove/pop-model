@@ -85,24 +85,24 @@ model {
 	iiv       ~ normal(mu_iiv, sd_iiv);
 
 	// Priors
-	intercept_latent ~ normal(0,10);
-	coeff_asymptote  ~ normal(0,10);
-	coeff_gain       ~ normal(0,10);
-	coeff_learning   ~ normal(0,10);
-	coeff_iiv        ~ normal(0,10);
-	coeff_age        ~ normal(0,10);
-	coeff_gender     ~ normal(0,10);
-	coeff_educ       ~ normal(0,10);
-	coeff_black      ~ normal(0,10);
-	coeff_hisp       ~ normal(0,10);
+	intercept_latent ~ normal(0,1);
+	coeff_asymptote  ~ normal(0,1);
+	coeff_gain       ~ normal(0,1);
+	coeff_learning   ~ normal(0,1);
+	coeff_iiv        ~ normal(0,1);
+	coeff_age        ~ normal(0,1);
+	coeff_gender     ~ normal(0,1);
+	coeff_educ       ~ normal(0,1);
+	coeff_black      ~ normal(0,1);
+	coeff_hisp       ~ normal(0,1);
 
 	mu_learning  ~ normal(0,10);
 	mu_asymptote ~ normal(0,10);
 	mu_gain      ~ normal(0,10);
-	mu_iiv       ~ normal(0,10);
+	mu_iiv       ~ normal(0,1);
 
 	sd_learning  ~ normal(0,10);
 	sd_asymptote ~ normal(0,10);
 	sd_gain      ~ normal(0,10);
-	sd_iiv       ~ normal(0,10);
+	sd_iiv       ~ normal(0,1);
 } 
