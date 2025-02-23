@@ -273,7 +273,7 @@ extract_coefficient_stats <- function(model) {
         samples <- rstan::extract(model)
         
         # Find coefficient parameters
-        coeff_params <- grep("^coeff", names(samples), value = TRUE)
+        coeff_params <- grep("^coeff|intercept_latent", names(samples), value = TRUE)
         
         if (length(coeff_params) == 0) {
             warning("No coefficient parameters found in model")
