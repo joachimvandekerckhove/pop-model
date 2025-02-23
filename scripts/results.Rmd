@@ -1,21 +1,28 @@
 ---
 title: "Partially observable predictor models for identifying cognitive markers"
 date: "2025-02-19"
-output: 
+output:
   pdf_document:
     toc: true
   github_document:
     toc: true
     html_preview: false
-editor_options: 
-  markdown: 
+editor_options:
+  markdown:
     wrap: 72
 ---
 
+These results belong to "Partially observable predictor models for identifying
+cognitive markers" by Zita Oravecz, Martin Sliwinski, Sharon H. Kim, Lindy
+Williams, Mindy J. Katz, and Joachim Vandekerckhove.
+
+Note that due to randomness in the MCMC procedure, these results may not
+exactly match the results in the paper.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
-  echo = FALSE, 
-  warning = FALSE, 
+  echo = FALSE,
+  warning = FALSE,
   message = FALSE,
   fig.path = "results_files/figure-gfm/"
 )
@@ -47,31 +54,31 @@ model_colors <- c(
 
 ```{r roc-plot, fig.width=8, fig.height=8}
 ggplot() +
-  geom_ribbon(data = results$ci_data,  
-              aes(x = FPR, 
-                  ymin = lower, 
+  geom_ribbon(data = results$ci_data,
+              aes(x = FPR,
+                  ymin = lower,
                   ymax = upper,
                   fill = Model,
                   group = Model),
               alpha = 0.2) +
   geom_line(data = results$plot_data,
-            aes(x = FPR, 
-                y = TPR, 
-                color = Model, 
-                group = Model), 
+            aes(x = FPR,
+                y = TPR,
+                color = Model,
+                group = Model),
             size = 1) +
-  geom_abline(intercept = 0, 
-              slope = 1, 
-              linetype = "dashed", 
+  geom_abline(intercept = 0,
+              slope = 1,
+              linetype = "dashed",
               color = "gray50") +
-  scale_color_manual(values = model_colors) + 
-  scale_fill_manual(values = model_colors) + 
-  labs(x = "False positive rate", 
-       y = "True positive rate") + 
-  coord_equal() + 
-  theme_minimal() + 
+  scale_color_manual(values = model_colors) +
+  scale_fill_manual(values = model_colors) +
+  labs(x = "False positive rate",
+       y = "True positive rate") +
+  coord_equal() +
+  theme_minimal() +
   theme(
-    text = element_text(family = "serif", color = "black"), 
+    text = element_text(family = "serif", color = "black"),
     axis.title = element_text(size = 26, color = "black"),
     axis.text = element_text(size = 22, color = "black"),
     legend.title = element_text(size = 22, color = "black"),
@@ -90,11 +97,11 @@ ggplot() +
 
 ```{r auc-table}
 cv_table <- do.call(rbind,
-                    lapply(results$cv_results, 
+                    lapply(results$cv_results,
                            function(res) {
                              data.frame(
                                Model = res$model,
-                               AUC = sprintf("%.3f [%.3f, %.3f]",
+                               AUC = sprintf("%.4f [%.4f, %.4f]",
                                              res$auc,
                                              res$ci_lower,
                                              res$ci_upper),
@@ -114,7 +121,7 @@ kable(cv_table,
 if (!is.null(results$fi_results$manifest)) {
   df <- results$fi_results$manifest
   colnames(df) <- c("mean", "sd", "2.5%", "97.5%")
-  kable(df, format = "pipe", digits = 3)
+  kable(df, format = "pipe", digits = 4)
 }
 ```
 
@@ -123,7 +130,7 @@ if (!is.null(results$fi_results$manifest)) {
 if (!is.null(results$fi_results$descriptive)) {
   df <- results$fi_results$descriptive
   colnames(df) <- c("mean", "sd", "2.5%", "97.5%")
-  kable(df, format = "pipe", digits = 3)
+  kable(df, format = "pipe", digits = 4)
 }
 ```
 
@@ -132,6 +139,6 @@ if (!is.null(results$fi_results$descriptive)) {
 if (!is.null(results$fi_results$process_model)) {
   df <- results$fi_results$process_model
   colnames(df) <- c("mean", "sd", "2.5%", "97.5%")
-  kable(df, format = "pipe", digits = 3)
+  kable(df, format = "pipe", digits = 4)
 }
 ```
