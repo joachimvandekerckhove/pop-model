@@ -1,5 +1,6 @@
-data/*
-tmp/*
-.tmp/*
+data/EAS316.Rdata
+tmp/
+.tmp/
 *.RData
+*.Rdata
 *.rds
