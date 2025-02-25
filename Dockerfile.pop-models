@@ -1,0 +1,62 @@
+# Use RStudio base image with exact version for reproducibility
+FROM rocker/rstudio:4.3.2
+
+# Set environment variables for parallel processing and memory optimization
+ENV R_MAX_VSIZE=100Gb
+ENV R_MAX_NUM_DLLS=500
+ENV MAKEFLAGS="-j32"
+ENV STAN_NUM_THREADS=32
+
+# Set up Ubuntu snapshot repository (February 1st, 2025)
+RUN sed -i -e 's/http:\/\/archive.ubuntu.com\/ubuntu\//http:\/\/snapshot.ubuntu.com\/ubuntu\/20250201T000000Z\//' \
+    -e 's/http:\/\/security.ubuntu.com\/ubuntu\//http:\/\/snapshot.ubuntu.com\/ubuntu\/20250201T000000Z\//' \
+    /etc/apt/sources.list
+
+# Set a fixed CRAN mirror for package installations
+RUN echo 'options(repos = c(CRAN = "https://packagemanager.posit.co/cran/2024-02-01"))' > /usr/local/lib/R/etc/Rprofile.site
+
+# Install system dependencies with exact versions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential=12.9ubuntu3 \
+    gfortran=4:11.2.0-1ubuntu1 \
+    libcurl4-openssl-dev=7.81.0-1ubuntu1.20 \
+    libssl-dev=3.0.2-0ubuntu1.18 \
+    libgmp-dev=2:6.2.1+dfsg-3ubuntu1 \
+    libmpfr-dev=4.1.0-3build3 \
+    libgit2-dev=1.1.0+dfsg.1-4.1ubuntu0.1 \
+    cmake=3.22.1-1ubuntu1.22.04.2 \
+    parallel=20210822+ds-2 \
+    python3=3.10.6-1~22.04.1 \
+    python3-pip=22.0.2+dfsg-1ubuntu0.5 \
+    git \
+    && apt-get clean
+
+# Install required R packages with exact versions
+RUN R -e "\
+    install.packages('rstan', version='2.32.5', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
+    install.packages('bridgesampling', version='1.1-2', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
+    install.packages('here', version='1.0.1', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
+    install.packages('lubridate', version='1.9.3', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
+    install.packages('cmdstanr', version='0.8.1', repos = c('https://stan-dev.r-universe.dev', getOption('repos'))); \
+    library(cmdstanr); \
+    install_cmdstan(cores=32, overwrite=TRUE)"
+
+# Install renv with exact version
+RUN R -e "install.packages('renv', version='1.0.3', repos='https://packagemanager.posit.co/cran/2024-02-01')"
+
+# Create project directory
+RUN mkdir -p /home/rstudio/pop-model && git clone https://github.com/joachimvandekerckhove/pop-model.git /home/rstudio/pop-model/ && chown -R rstudio:rstudio /home/rstudio
+
+# Expose RStudio port
+EXPOSE 8787
+
+# Add labels for better documentation
+LABEL maintainer="Joachim Vandekerckhove <joachim@uci.edu>"
+LABEL description="RStudio environment with RStan and CmdStan for statistical modeling"
+LABEL r.version="4.3.2"
+LABEL rstan.version="2.32.5"
+LABEL cmdstanr.version="0.8.1"
+LABEL ubuntu.version="22.04"
+LABEL build.date="2025-02-25"
+
+
