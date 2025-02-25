@@ -2,6 +2,7 @@
 FROM rocker/rstudio:4.3.2
 
 # Set environment variables for parallel processing and memory optimization
+#  Customize this at will
 ENV R_MAX_VSIZE=100Gb
 ENV R_MAX_NUM_DLLS=500
 ENV MAKEFLAGS="-j32"
@@ -31,7 +32,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     && apt-get clean
 
-# Install required R packages with exact versions
+# Install required R packages with exact versions (February 1st, 2024 [sic])
 RUN R -e "\
     install.packages('rstan', version='2.32.5', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
     install.packages('bridgesampling', version='1.1-2', repos='https://packagemanager.posit.co/cran/2024-02-01'); \
@@ -45,12 +46,14 @@ RUN R -e "\
 RUN R -e "install.packages('renv', version='1.0.3', repos='https://packagemanager.posit.co/cran/2024-02-01')"
 
 # Create project directory
-RUN mkdir -p /home/rstudio/pop-model && git clone https://github.com/joachimvandekerckhove/pop-model.git /home/rstudio/pop-model/ && chown -R rstudio:rstudio /home/rstudio
+RUN mkdir -p /home/rstudio/pop-model && \
+	git clone https://github.com/joachimvandekerckhove/pop-model.git /home/rstudio/pop-model/ && \
+	chown -R rstudio:rstudio /home/rstudio
 
 # Expose RStudio port
 EXPOSE 8787
 
-# Add labels for better documentation
+# Add some labels
 LABEL maintainer="Joachim Vandekerckhove <joachim@uci.edu>"
 LABEL description="RStudio environment with RStan and CmdStan for statistical modeling"
 LABEL r.version="4.3.2"
